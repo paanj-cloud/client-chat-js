@@ -1,0 +1,20 @@
+{
+    "name": "chat-client-examples",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Examples for @paanj/chat-client",
+    "scripts": {
+        "setup": "node setup.js",
+        "start:js": "node basic-usage.js",
+        "start:ts": "ts-node basic-usage.ts"
+    },
+    "dependencies": {
+        "axios": "^1.6.0",
+        "@paanj/client": "file:../../client",
+        "@paanj/chat-client": "file:.."
+    },
+    "devDependencies": {
+        "ts-node": "^10.9.2",
+        "typescript": "^5.0.0"
+    }
+}
