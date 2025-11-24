@@ -49,12 +49,7 @@ export class MessagesResource {
      * Listen to new messages in a conversation
      */
     onMessage(conversationId: string, callback: (message: Message) => void): Unsubscribe {
-        this.client.subscribe({
-            type: 'subscribe',
-            resource: 'conversation',
-            id: conversationId,
-            events: ['message.create'],
-        });
+        // Client is implicitly subscribed to conversations it is a member of
         return this.client.on(`conversation:${conversationId}:message.create`, callback);
     }
 }
