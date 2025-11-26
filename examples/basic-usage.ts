@@ -61,9 +61,9 @@ async function main() {
         });
         console.log('✅ Created conversation:', conversation.id);
 
-        // Listen to messages in this conversation
-        chat.messages.onMessage(conversation.id, (msg) => {
-            console.log(`\n📨 New message in ${conversation.id}:`);
+        // Listen to messages globally
+        chat.onMessage((msg) => {
+            console.log(`\n📨 New message in ${msg.conversationId}:`);
             console.log(`   From: ${msg.senderId}`);
             console.log(`   Content: ${msg.content}`);
         });
@@ -71,7 +71,7 @@ async function main() {
 
         // Send a message
         console.log('\n📤 Sending message...');
-        await chat.messages.send(conversation.id, 'Hello from Paanj Client SDK!');
+        await chat.conversations(conversation.id).send('Hello from Paanj Client SDK!');
         console.log('✅ Message sent');
 
         // Keep connection alive
