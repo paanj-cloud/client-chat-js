@@ -3,6 +3,7 @@
 > Build powerful real-time chat applications with ease.
 
 [![npm version](https://img.shields.io/npm/v/@paanj/chat-client.svg)](https://www.npmjs.com/package/@paanj/chat-client)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/license-Custom-blue.svg)](./LICENSE)
 
 ## Overview
