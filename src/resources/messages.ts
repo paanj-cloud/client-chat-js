@@ -33,16 +33,46 @@ export class MessagesResource {
     /**
      * List messages in a conversation
      */
-    async list(conversationId: string, filters?: MessageFilters): Promise<Message[]> {
-        const httpClient = this.client.getHttpClient();
-        const params = new URLSearchParams();
-        if (filters?.limit) params.append('limit', filters.limit.toString());
-        if (filters?.offset) params.append('offset', filters.offset.toString());
-        if (filters?.before) params.append('before', filters.before);
-        if (filters?.after) params.append('after', filters.after);
+    /**
+     * List messages in a conversation
+     */
+    list(conversationId: string, filters?: MessageFilters) {
+        const execute = async (finalFilters: MessageFilters) => {
+            const httpClient = this.client.getHttpClient();
+            const params = new URLSearchParams();
+            if (finalFilters?.limit) params.append('limit', finalFilters.limit.toString());
+            if (finalFilters?.offset) params.append('offset', finalFilters.offset.toString());
+            if (finalFilters?.before) params.append('before', finalFilters.before);
+            if (finalFilters?.after) params.append('after', finalFilters.after);
 
-        const query = params.toString();
-        return httpClient.request<Message[]>('GET', `/api/v1/conversations/${conversationId}/messages${query ? `?${query}` : ''}`);
+            const query = params.toString();
+            const response = await httpClient.request<{ messages: Message[] }>('GET', `/api/v1/conversations/${conversationId}/messages${query ? `?${query}` : ''}`);
+            return response.messages;
+        };
+
+        const currentFilters = { ...filters };
+
+        const chain = {
+            then: (resolve: (value: Message[]) => void, reject: (reason: any) => void) => {
+                return execute(currentFilters).then(resolve, reject);
+            },
+            limit: (limit: number) => {
+                currentFilters.limit = limit;
+                return chain;
+            },
+            page: (page: number) => {
+                // Assuming page size is limit or default 20
+                const limit = currentFilters.limit || 20;
+                currentFilters.offset = (page - 1) * limit;
+                return chain;
+            },
+            offset: (offset: number) => {
+                currentFilters.offset = offset;
+                return chain;
+            }
+        };
+
+        return chain;
     }
 
     /**

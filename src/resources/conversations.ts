@@ -40,12 +40,24 @@ export class ConversationsResource {
         return httpClient.request<Conversation[]>('GET', `/api/v1/conversations${query ? `?${query}` : ''}`);
     }
 
+
+
     /**
-     * Join a conversation
+     * Add a participant to a conversation
      */
-    async join(conversationId: string): Promise<void> {
+    async addParticipant(conversationId: string, userId: string, role: 'admin' | 'member' = 'member'): Promise<void> {
         const httpClient = this.client.getHttpClient();
-        await httpClient.request<void>('POST', `/api/v1/conversations/${conversationId}/participants`);
+        await httpClient.request<void>('POST', `/api/v1/conversations/${conversationId}/members`, {
+            members: [{ userId: parseInt(userId), role }]
+        });
+    }
+
+    /**
+     * List participants in a conversation
+     */
+    async listParticipants(conversationId: string): Promise<any[]> {
+        const conversation = await this.get(conversationId);
+        return (conversation as any).members || [];
     }
 
     /**
@@ -53,7 +65,12 @@ export class ConversationsResource {
      */
     async leave(conversationId: string): Promise<void> {
         const httpClient = this.client.getHttpClient();
-        await httpClient.request<void>('DELETE', `/api/v1/conversations/${conversationId}/participants/me`);
+        const userId = this.client.getUserId();
+        if (!userId) throw new Error('User not authenticated');
+
+        await httpClient.request<void>('DELETE', `/api/v1/conversations/${conversationId}/members`, {
+            userIds: [parseInt(userId)]
+        });
     }
 
     /**

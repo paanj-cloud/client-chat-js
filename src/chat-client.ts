@@ -1,6 +1,7 @@
 import { PaanjClient } from '@paanj/client';
 import { MessagesResource } from './resources/messages';
 import { ConversationsResource } from './resources/conversations';
+import { ConversationContext } from './resources/conversation-context';
 
 /**
  * ChatClient - Chat features for Paanj platform
@@ -8,15 +9,8 @@ import { ConversationsResource } from './resources/conversations';
  * Provides real-time messaging, conversation management, and user presence.
  */
 export class ChatClient {
-    /**
-     * Messages resource - manage and monitor messages
-     */
-    public readonly messages: MessagesResource;
-
-    /**
-     * Conversations resource - manage and monitor conversations
-     */
-    public readonly conversations: ConversationsResource;
+    private messagesResource: MessagesResource;
+    private conversationsResource: ConversationsResource;
 
     private client: PaanjClient;
 
@@ -29,7 +23,34 @@ export class ChatClient {
         this.client = client;
 
         // Initialize resources
-        this.messages = new MessagesResource(client);
-        this.conversations = new ConversationsResource(client);
+        this.messagesResource = new MessagesResource(client);
+        this.conversationsResource = new ConversationsResource(client);
+    }
+
+    /**
+     * Access conversation features
+     * 
+     * @param conversationId - Optional ID to target a specific conversation
+     */
+    public conversations = Object.assign(
+        (conversationId: string) => {
+            return new ConversationContext(this.client, conversationId, this.messagesResource, this.conversationsResource);
+        },
+        {
+            create: (data: any) => this.conversationsResource.create(data),
+            list: (filters?: any) => this.conversationsResource.list(filters),
+            get: (id: string) => this.conversationsResource.get(id),
+        }
+    );
+
+    /**
+     * Listen to new messages across all conversations
+     */
+    public onMessage(callback: (message: any) => void) {
+        // In a real implementation, this might need a global subscription or 
+        // relying on the client to dispatch all 'message.create' events.
+        // For now, we'll assume the client emits 'message.create' for any message 
+        // in any joined conversation.
+        return this.client.on('message.create', callback);
     }
 }
