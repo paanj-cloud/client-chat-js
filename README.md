@@ -1,19 +1,21 @@
 # @paanj/chat-client
 
-> Chat client features for Paanj platform - real-time messaging and conversations
+> Build powerful real-time chat applications with ease.
 
 [![npm version](https://img.shields.io/npm/v/@paanj/chat-client.svg)](https://www.npmjs.com/package/@paanj/chat-client)
 [![License](https://img.shields.io/badge/license-Custom-blue.svg)](./LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-16+-green.svg)](https://nodejs.org/)
 
 ## Overview
 
-`@paanj/chat-client` provides comprehensive chat features for end-users:
-- 💬 **Real-time Messaging** - Send and receive messages instantly
-- 👥 **Conversations** - Create and manage group chats and DMs
-- 🔔 **Live Updates** - Real-time events for messages and conversations
-- 🌐 **Isomorphic** - Works in Node.js and Browser environments
-- 🔌 **Modular** - Works with `@paanj/client` core package
+The `@paanj/chat-client` SDK empowers developers to integrate robust, real-time messaging capabilities into their applications. Whether you're building a social platform, a customer support tool, or an internal collaboration app, our SDK handles the heavy lifting of real-time communication.
+
+### Key Features
+
+- 💬 **Real-time Messaging**: Instant message delivery with low latency.
+- 👥 **Group Conversations**: Create and manage dynamic group chats and direct messages.
+- 🔔 **Live Events**: Subscribe to real-time updates for new messages and conversation changes.
+- 🌐 **Cross-Platform**: Fully isomorphic design working seamlessly in Node.js and modern browsers.
+- 🔒 **Secure**: Built with security in mind, integrating with `@paanj/client` for robust authentication.
 
 ## Installation
 
@@ -23,111 +25,119 @@ npm install @paanj/client @paanj/chat-client
 
 ## Quick Start
 
+Get up and running in minutes.
+
 ```typescript
 import { PaanjClient } from '@paanj/client';
 import { ChatClient } from '@paanj/chat-client';
 
-// Initialize core client
-const client = new PaanjClient({ apiKey: 'pk_live_key' });
+// 1. Initialize the core client
+const client = new PaanjClient({ apiKey: 'YOUR_API_KEY' });
 
-// Authenticate
-await client.authenticateAnonymous({ name: 'John Doe' });
+// 2. Authenticate your user
+// Option A: Anonymous / New Session
+await client.authenticateAnonymous({ name: 'Alice' });
+
+// Option B: Existing Session (with Access Token and Refresh Token)
+// await client.authenticateWithToken('ACCESS_TOKEN', 'USER_ID', 'REFRESH_TOKEN');
+
 await client.connect();
 
-// Initialize chat features
+// 3. Initialize the Chat SDK
 const chat = new ChatClient(client);
 
-// Create conversation
+// 4. Create a conversation
 const conversation = await chat.conversations.create({
-  name: 'My Chat',
+  name: 'Team Project',
   participantIds: [client.getUserId()!]
 });
 
-// Send message
-await chat.messages.send(conversation.id, 'Hello world!');
-
-// Listen for messages
-chat.messages.onMessage(conversation.id, (msg) => {
-  console.log('New message:', msg.content);
+// 5. Listen for incoming messages globally
+chat.onMessage((message) => {
+  console.log(`[${message.senderId}]: ${message.content}`);
 });
+
+// 6. Send a message
+await chat.conversations(conversation.id).send('Hello, team! 👋');
 ```
 
 ## API Reference
 
-### ChatClient
+### Initialization
 
-#### Constructor
+#### `new ChatClient(client)`
+Creates a new instance of the Chat SDK.
+- `client`: An authenticated `PaanjClient` instance.
 
+### Conversations
+
+Manage chat rooms and direct messages.
+
+#### `chat.conversations.create(data)`
+Creates a new conversation.
+- `data`: Object containing `name` (optional) and `participantIds`.
+- Returns: `Promise<Conversation>`
+
+#### `chat.conversations.list(filters?)`
+Retrieves a list of conversations the current user is part of.
+- Returns: `Promise<Conversation[]>`
+
+#### `chat.conversations.get(conversationId)`
+Retrieves details for a specific conversation.
+- Returns: `Promise<Conversation>`
+
+### Conversation Context
+
+Interact with a specific conversation using the fluent API: `chat.conversations(conversationId)`
+
+#### `.send(content, metadata?)`
+Sends a message to the conversation.
+- `content`: The text content of the message.
+- `metadata`: Optional JSON object for custom data.
+- Returns: `Promise<void>`
+
+#### `.messages().list(filters?)`
+Retrieves message history. Supports chaining for pagination.
+- `.limit(n)`: Limit number of messages.
+- `.page(n)`: specific page number.
+- `.offset(n)`: specific offset.
+- Returns: `Promise<Message[]>`
+
+Example:
 ```typescript
-new ChatClient(client: PaanjClient)
+const history = await chat.conversations(id)
+  .messages()
+  .list()
+  .limit(20)
+  .page(2);
 ```
 
-Creates a new ChatClient instance using an existing PaanjClient instance.
+#### `.participants().list()`
+List all participants in the conversation.
+- Returns: `Promise<Participant[]>`
 
-### Messages Resource
+#### `.participants().add(userId, role?)`
+Add a user to the conversation (Admin only).
+- `userId`: ID of the user to add.
+- `role`: 'admin' or 'member' (default: 'member').
+- Returns: `Promise<void>`
 
-#### Methods
+#### `.leave()`
+Removes the current user from the conversation.
+- Returns: `Promise<void>`
 
-**`send(conversationId, content, metadata?): Promise<void>`**  
-Send a message to a conversation via WebSocket.
+### Global Events
 
-**`list(conversationId, filters?): Promise<Message[]>`**  
-List messages in a conversation with pagination.
-
-**`onMessage(conversationId, callback): Unsubscribe`**  
-Listen to new messages in a specific conversation.
-
-### Conversations Resource
-
-#### Methods
-
-**`create(data): Promise<Conversation>`**  
-Create a new conversation.
-
-**`get(conversationId): Promise<Conversation>`**  
-Get conversation details.
-
-**`list(filters?): Promise<Conversation[]>`**  
-List conversations the user is a participant of.
-
-**`join(conversationId): Promise<void>`**  
-Join a conversation.
-
-**`leave(conversationId): Promise<void>`**  
-Leave a conversation.
-
-**`onUpdate(conversationId, callback): Unsubscribe`**  
-Listen to conversation updates.
-
-## Examples
-
-Check the [`examples/`](./examples) directory for complete working examples:
-
-- `basic-usage.ts` - Basic initialization and messaging
-- `basic-usage.js` - JavaScript version
-
-### Running Examples
-
-```bash
-# Install dependencies
-npm install
-
-# Build the package
-npm run build
-
-# Run examples
-npx ts-node examples/basic-usage.ts
-```
-
-## License
-
-This project is licensed under a custom license. See the [LICENSE](./LICENSE) file for details.
+#### `chat.onMessage(callback)`
+Subscribes to real-time messages across all joined conversations.
+- `callback`: Function called when a new message is received.
+- Returns: `Unsubscribe` function.
 
 ## Support
 
-- 📧 Email: support@paanj.com
-- 📖 Documentation: https://docs.paanj.com
-- 🐛 Issues: https://github.com/paanj/chat-baas/issues
+- 📖 **Documentation**: [docs.paanj.com](https://docs.paanj.com)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/paanj/chat-baas/issues)
+- 📧 **Contact**: support@paanj.com
 
 ---
 
