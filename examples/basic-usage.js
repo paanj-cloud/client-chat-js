@@ -69,6 +69,21 @@ async function main() {
         await chat.conversations(conversation.id).send('Hello from JavaScript!');
         console.log('✅ Message sent');
 
+        // Example: Block/Unblock user
+        try {
+            console.log('\n🚫 Blocking user...');
+            await chat.users.block('user_123');
+            console.log('✅ User blocked');
+
+            const blocked = await chat.users.getBlocked();
+            console.log('📋 Blocked users:', blocked);
+
+            await chat.users.unblock('user_123');
+            console.log('✅ User unblocked');
+        } catch (error) {
+            console.log('Block/Unblock failed (expected in demo)');
+        }
+
         // Keep connection alive
         console.log('\n👀 Monitoring events... (Press Ctrl+C to exit)');
 

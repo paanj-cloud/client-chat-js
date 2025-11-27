@@ -1,6 +1,7 @@
 import { PaanjClient } from '@paanj/client';
 import { MessagesResource } from './resources/messages';
 import { ConversationsResource } from './resources/conversations';
+import { UsersResource } from './resources/users';
 import { ConversationContext } from './resources/conversation-context';
 
 /**
@@ -11,6 +12,7 @@ import { ConversationContext } from './resources/conversation-context';
 export class ChatClient {
     private messagesResource: MessagesResource;
     private conversationsResource: ConversationsResource;
+    public users: UsersResource;
 
     private client: PaanjClient;
 
@@ -25,6 +27,7 @@ export class ChatClient {
         // Initialize resources
         this.messagesResource = new MessagesResource(client);
         this.conversationsResource = new ConversationsResource(client);
+        this.users = new UsersResource(client);
     }
 
     /**
