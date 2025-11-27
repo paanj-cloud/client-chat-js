@@ -36,14 +36,40 @@ export class ConversationsResource {
     /**
      * List my conversations
      */
-    async list(filters?: ConversationFilters): Promise<Conversation[]> {
-        const httpClient = this.client.getHttpClient();
-        const params = new URLSearchParams();
-        if (filters?.limit) params.append('limit', filters.limit.toString());
-        if (filters?.offset) params.append('offset', filters.offset.toString());
+    list(filters?: ConversationFilters) {
+        const execute = async (finalFilters: ConversationFilters) => {
+            const httpClient = this.client.getHttpClient();
+            const params = new URLSearchParams();
+            if (finalFilters?.limit) params.append('limit', finalFilters.limit.toString());
+            if (finalFilters?.offset) params.append('offset', finalFilters.offset.toString());
 
-        const query = params.toString();
-        return httpClient.request<Conversation[]>('GET', `/api/v1/conversations${query ? `?${query}` : ''}`);
+            const query = params.toString();
+            return httpClient.request<Conversation[]>('GET', `/api/v1/conversations${query ? `?${query}` : ''}`);
+        };
+
+        const currentFilters = { ...filters };
+
+        const chain = {
+            then: (resolve: (value: Conversation[]) => void, reject: (reason: any) => void) => {
+                return execute(currentFilters).then(resolve, reject);
+            },
+            limit: (limit: number) => {
+                currentFilters.limit = limit;
+                return chain;
+            },
+            page: (page: number) => {
+                // Assuming page size is limit or default 20
+                const limit = currentFilters.limit || 20;
+                currentFilters.offset = (page - 1) * limit;
+                return chain;
+            },
+            offset: (offset: number) => {
+                currentFilters.offset = offset;
+                return chain;
+            }
+        };
+
+        return chain;
     }
 
 

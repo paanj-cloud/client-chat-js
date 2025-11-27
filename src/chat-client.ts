@@ -2,6 +2,7 @@ import { PaanjClient } from '@paanj/client';
 import { MessagesResource } from './resources/messages';
 import { ConversationsResource } from './resources/conversations';
 import { UsersResource } from './resources/users';
+import { UserContext } from './resources/user-context';
 import { ConversationContext } from './resources/conversation-context';
 
 /**
@@ -12,7 +13,7 @@ import { ConversationContext } from './resources/conversation-context';
 export class ChatClient {
     private messagesResource: MessagesResource;
     private conversationsResource: ConversationsResource;
-    public users: UsersResource;
+    private usersResource: UsersResource;
 
     private client: PaanjClient;
 
@@ -27,7 +28,7 @@ export class ChatClient {
         // Initialize resources
         this.messagesResource = new MessagesResource(client);
         this.conversationsResource = new ConversationsResource(client);
-        this.users = new UsersResource(client);
+        this.usersResource = new UsersResource(client);
     }
 
     /**
@@ -43,6 +44,20 @@ export class ChatClient {
             create: (data: any) => this.conversationsResource.create(data),
             list: (filters?: any) => this.conversationsResource.list(filters),
             get: (id: string) => this.conversationsResource.get(id),
+        }
+    );
+
+    /**
+     * Access user features
+     * 
+     * @param userId - Optional ID to target a specific user
+     */
+    public users = Object.assign(
+        (userId: string) => {
+            return new UserContext(this.client, userId, this.usersResource);
+        },
+        {
+            getBlocked: () => this.usersResource.getBlocked(),
         }
     );
 
