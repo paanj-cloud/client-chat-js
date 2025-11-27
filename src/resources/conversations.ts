@@ -16,7 +16,13 @@ export class ConversationsResource {
      */
     async create(data: CreateConversationData): Promise<Conversation> {
         const httpClient = this.client.getHttpClient();
-        return httpClient.request<Conversation>('POST', '/api/v1/conversations', data);
+        const conversation = await httpClient.request<Conversation>('POST', '/api/v1/conversations', data);
+
+        // Wait briefly for the server's conversation.created event to propagate
+        // This ensures all participants (including creator) are subscribed via server-side event handling
+        await new Promise(resolve => setTimeout(resolve, 150));
+
+        return conversation;
     }
 
     /**
