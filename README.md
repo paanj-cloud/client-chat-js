@@ -266,7 +266,7 @@ The `chat.onMessage()` method has been removed. Use `chat.conversations.onMessag
 ## Support
 
 - 📖 **Documentation**: [docs.paanj.com](https://docs.paanj.com)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/paanj/chat-baas/issues)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/paanj-cloud/client-chat-js/issues)
 - 📧 **Contact**: support@paanj.com
 
 ---
