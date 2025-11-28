@@ -55,8 +55,8 @@ const conversation = await chat.conversations.create({
   participantIds: [session.userId, 'user_456']
 });
 
-// 6. Listen for incoming messages in this conversation
-chat.conversations.onMessage(conversation.id, (message) => {
+// 6. Listen for incoming messages globally
+chat.conversations.onMessage((message) => {
   console.log(`[${message.senderId}]: ${message.content}`);
 });
 
@@ -177,18 +177,36 @@ Removes the current user from the conversation.
 await chat.conversations(conversation.id).leave();
 ```
 
+#### `.get()`
+Retrieves details for this conversation.
+- Returns: `Promise<Conversation>`
+
+```typescript
+const details = await chat.conversations(id).get();
+```
+
+#### `.onUpdate(callback)`
+Listen to updates for this conversation.
+- `callback`: Function called when conversation is updated.
+- Returns: `Unsubscribe` function.
+
+```typescript
+chat.conversations(id).onUpdate((update) => {
+  console.log('Updated:', update);
+});
+```
+
 ### Messages
 
 Listen to messages in specific conversations.
 
-#### `chat.conversations.onMessage(conversationId, callback)`
-Subscribes to real-time messages in a specific conversation.
-- `conversationId`: The ID of the conversation to listen to.
-- `callback`: Function called when a new message is created in the conversation.
+#### `chat.conversations.onMessage(callback)`
+Subscribes to real-time messages globally (for all conversations).
+- `callback`: Function called when a new message is created.
 - Returns: `Unsubscribe` function (call to stop listening).
 
 ```typescript
-const unsubscribe = chat.conversations.onMessage(conversationId, (message) => {
+const unsubscribe = chat.conversations.onMessage((message) => {
   console.log(`New message from ${message.senderId}: ${message.content}`);
 });
 
@@ -243,7 +261,7 @@ await userCtx.unblock();
 
 ### Global Events (Deprecated)
 
-The `chat.onMessage()` method has been removed. Use `chat.conversations.onMessage(conversationId, callback)` instead to listen for messages in specific conversations.
+The `chat.onMessage()` method has been removed. Use `chat.conversations.onMessage(callback)` instead to listen for messages globally.
 
 ## Support
 

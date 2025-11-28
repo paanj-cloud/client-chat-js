@@ -44,6 +44,7 @@ export class ChatClient {
             create: (data: any) => this.conversationsResource.create(data),
             list: (filters?: any) => this.conversationsResource.list(filters),
             get: (id: string) => this.conversationsResource.get(id),
+            onMessage: (callback: (message: any) => void) => this.client.on('message.create', callback),
         }
     );
 

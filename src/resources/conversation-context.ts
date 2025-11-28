@@ -56,4 +56,11 @@ export class ConversationContext {
         const httpClient = this.client.getHttpClient();
         await httpClient.request<void>('DELETE', `/api/v1/conversations/${this.conversationId}/participants/me`);
     }
+
+    /**
+     * Listen to updates for this conversation
+     */
+    onUpdate(callback: (data: any) => void) {
+        return this.conversationsResource.onUpdate(this.conversationId, callback);
+    }
 }
