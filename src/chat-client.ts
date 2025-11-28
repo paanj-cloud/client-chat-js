@@ -58,17 +58,7 @@ export class ChatClient {
         },
         {
             getBlocked: () => this.usersResource.getBlocked(),
+            onTokenRefresh: (callback: (data: any) => void) => this.usersResource.onTokenRefresh(callback),
         }
     );
-
-    /**
-     * Listen to new messages across all conversations
-     */
-    public onMessage(callback: (message: any) => void) {
-        // In a real implementation, this might need a global subscription or 
-        // relying on the client to dispatch all 'message.create' events.
-        // For now, we'll assume the client emits 'message.create' for any message 
-        // in any joined conversation.
-        return this.client.on('message.create', callback);
-    }
 }

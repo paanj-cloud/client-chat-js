@@ -1,4 +1,4 @@
-import { PaanjClient } from '@paanj/client';
+import { PaanjClient, Unsubscribe } from '@paanj/client';
 import { UsersResource } from './users';
 
 export class UserContext {
@@ -10,6 +10,14 @@ export class UserContext {
         this.client = client;
         this.userId = userId;
         this.usersResource = usersResource;
+    }
+
+    /**
+     * Listen to token refresh events for this user
+     * @param callback - Function to call when token is refreshed
+     */
+    onTokenRefresh(callback: (data: { userId: string | null; accessToken: string; refreshToken: string }) => void): Unsubscribe {
+        return this.usersResource.onTokenRefresh(callback);
     }
 
     /**

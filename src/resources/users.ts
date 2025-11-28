@@ -1,4 +1,4 @@
-import { PaanjClient } from '@paanj/client';
+import { PaanjClient, Unsubscribe } from '@paanj/client';
 
 /**
  * Users resource - manage user interactions
@@ -8,6 +8,14 @@ export class UsersResource {
 
     constructor(client: PaanjClient) {
         this.client = client;
+    }
+
+    /**
+     * Listen to token refresh events
+     * @param callback - Function to call when token is refreshed
+     */
+    onTokenRefresh(callback: (data: { userId: string | null; accessToken: string; refreshToken: string }) => void): Unsubscribe {
+        return this.client.on('token.updated', callback);
     }
 
     /**

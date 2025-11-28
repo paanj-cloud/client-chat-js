@@ -55,12 +55,17 @@ const conversation = await chat.conversations.create({
   participantIds: [session.userId, 'user_456']
 });
 
-// 6. Listen for incoming messages globally
-chat.onMessage((message) => {
+// 6. Listen for incoming messages in this conversation
+chat.conversations.onMessage(conversation.id, (message) => {
   console.log(`[${message.senderId}]: ${message.content}`);
 });
 
-// 7. Send a message
+// 7. Listen for token refresh events
+chat.users.onTokenRefresh(({ userId, accessToken, refreshToken }) => {
+  console.log('Token refreshed for user:', userId);
+});
+
+// 8. Send a message
 await chat.conversations(conversation.id).send('Hello, team! 👋');
 ```
 
@@ -86,8 +91,8 @@ const session = await client.authenticateAnonymous({
 // Option B: Existing session (reuse previous access token)
 await client.authenticateWithToken(
   'ACCESS_TOKEN',
-  'USER_ID',  // Optional
-  'REFRESH_TOKEN'  // Optional
+  'USER_ID',  // Optional, can be extracted from token
+  'REFRESH_TOKEN'  // Required for token refresh functionality
 );
 
 // Get user ID after authentication
@@ -172,12 +177,73 @@ Removes the current user from the conversation.
 await chat.conversations(conversation.id).leave();
 ```
 
-### Global Events
+### Messages
 
-#### `chat.onMessage(callback)`
-Subscribes to real-time messages across all joined conversations.
-- `callback`: Function called when a new message is received.
+Listen to messages in specific conversations.
+
+#### `chat.conversations.onMessage(conversationId, callback)`
+Subscribes to real-time messages in a specific conversation.
+- `conversationId`: The ID of the conversation to listen to.
+- `callback`: Function called when a new message is created in the conversation.
+- Returns: `Unsubscribe` function (call to stop listening).
+
+```typescript
+const unsubscribe = chat.conversations.onMessage(conversationId, (message) => {
+  console.log(`New message from ${message.senderId}: ${message.content}`);
+});
+
+// Later, unsubscribe from messages
+unsubscribe();
+```
+
+### Users
+
+Manage user interactions including token refresh events and blocking.
+
+#### `chat.users.onTokenRefresh(callback)`
+Subscribes to token refresh events.
+- `callback`: Function called when the user's token is refreshed. Receives object with `userId`, `accessToken`, and `refreshToken`.
 - Returns: `Unsubscribe` function.
+
+```typescript
+const unsubscribe = chat.users.onTokenRefresh(({ userId, accessToken, refreshToken }) => {
+  console.log(`Token refreshed for user ${userId}`);
+  // Handle token update (e.g., persist to secure storage)
+});
+
+// Later, unsubscribe from token updates
+unsubscribe();
+```
+
+#### `chat.users.getBlocked()`
+Retrieves the list of blocked user IDs for the current user.
+- Returns: `Promise<string[]>`
+
+```typescript
+const blockedIds = await chat.users.getBlocked();
+console.log('Blocked users:', blockedIds);
+```
+
+#### `chat.users(userId)`
+Access user context for a specific user.
+- Returns: `UserContext`
+
+```typescript
+const userCtx = chat.users('user_123');
+
+// Listen for token refresh for this user
+userCtx.onTokenRefresh(({ userId, accessToken, refreshToken }) => {
+  console.log(`Token refreshed for ${userId}`);
+});
+
+// Block/unblock this user
+await userCtx.block();
+await userCtx.unblock();
+```
+
+### Global Events (Deprecated)
+
+The `chat.onMessage()` method has been removed. Use `chat.conversations.onMessage(conversationId, callback)` instead to listen for messages in specific conversations.
 
 ## Support
 

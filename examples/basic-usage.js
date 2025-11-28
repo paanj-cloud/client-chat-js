@@ -47,6 +47,12 @@ async function main() {
         const chat = new ChatClient(client);
         console.log('✅ Chat features initialized');
 
+        // Listen to token refresh events
+        chat.users.onTokenRefresh(({ userId, accessToken, refreshToken }) => {
+            console.log(`\n🔄 Token refreshed for user: ${userId}`);
+        });
+        console.log('👂 Listening for token updates...');
+
         // Create a conversation
         console.log('\n💬 Creating conversation...');
         const conversation = await chat.conversations.create({
@@ -56,13 +62,13 @@ async function main() {
         });
         console.log('✅ Created conversation:', conversation.id);
 
-        // Listen to messages globally
-        chat.onMessage((msg) => {
+        // Listen to messages for this conversation
+        chat.conversations.onMessage(conversation.id, (msg) => {
             console.log(`\n📨 New message in ${msg.conversationId}:`);
             console.log(`   From: ${msg.senderId}`);
             console.log(`   Content: ${msg.content}`);
         });
-        console.log('👂 Listening for messages...');
+        console.log('👂 Listening for messages in conversation...');
 
         // Send a message
         console.log('\n📤 Sending message...');

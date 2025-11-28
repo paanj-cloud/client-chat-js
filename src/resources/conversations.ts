@@ -93,6 +93,15 @@ export class ConversationsResource {
     }
 
     /**
+     * Listen to new messages in a conversation
+     * @param conversationId - ID of the conversation to listen to
+     * @param callback - Function to call when a new message is created
+     */
+    onMessage(conversationId: string, callback: (message: any) => void) {
+        return this.client.on(`conversation:${conversationId}:message.create`, callback);
+    }
+
+    /**
      * Leave a conversation
      */
     async leave(conversationId: string): Promise<void> {
