@@ -33,32 +33,34 @@ import { PaanjClient } from '@paanj/client';
 import { ChatClient } from '@paanj/chat-client';
 
 // 1. Initialize the core client
-const client = new PaanjClient({ apiKey: 'YOUR_API_KEY' });
+const client = new PaanjClient({ apiKey: 'YOUR_PUBLIC_API_KEY' });
 
-// 2. Authenticate your user
-// Option A: Anonymous / New Session
-await client.authenticateAnonymous({ name: 'Alice' });
-
-// Option B: Existing Session (with Access Token and Refresh Token)
-// await client.authenticateWithToken('ACCESS_TOKEN', 'USER_ID', 'REFRESH_TOKEN');
-
-await client.connect();
-
-// 3. Initialize the Chat SDK
-const chat = new ChatClient(client);
-
-// 4. Create a conversation
-const conversation = await chat.conversations.create({
-  name: 'Team Project',
-  participantIds: [client.getUserId()!]
+// 2. Authenticate your user (required before using chat)
+const session = await client.authenticateAnonymous({ 
+  name: 'Alice',
+  metadata: { email: 'alice@example.com' }
 });
 
-// 5. Listen for incoming messages globally
+console.log('User ID:', session.userId);
+
+// 3. Connect to real-time server
+await client.connect();
+
+// 4. Initialize the Chat SDK
+const chat = new ChatClient(client);
+
+// 5. Create a conversation
+const conversation = await chat.conversations.create({
+  name: 'Team Project',
+  participantIds: [session.userId, 'user_456']
+});
+
+// 6. Listen for incoming messages globally
 chat.onMessage((message) => {
   console.log(`[${message.senderId}]: ${message.content}`);
 });
 
-// 6. Send a message
+// 7. Send a message
 await chat.conversations(conversation.id).send('Hello, team! 👋');
 ```
 
@@ -68,7 +70,30 @@ await chat.conversations(conversation.id).send('Hello, team! 👋');
 
 #### `new ChatClient(client)`
 Creates a new instance of the Chat SDK.
-- `client`: An authenticated `PaanjClient` instance.
+- `client`: An authenticated `PaanjClient` instance (you must call `authenticateAnonymous()` or `authenticateWithToken()` first).
+
+### Authentication
+
+Before using chat features, you must authenticate:
+
+```typescript
+// Option A: Anonymous authentication (creates a new user)
+const session = await client.authenticateAnonymous({ 
+  name: 'John Doe',
+  metadata: { email: 'john@example.com' }
+});
+
+// Option B: Existing session (reuse previous access token)
+await client.authenticateWithToken(
+  'ACCESS_TOKEN',
+  'USER_ID',  // Optional
+  'REFRESH_TOKEN'  // Optional
+);
+
+// Get user ID after authentication
+const userId = client.getUserId();
+console.log('Session User ID:', userId);
+```
 
 ### Conversations
 
@@ -94,28 +119,38 @@ Interact with a specific conversation using the fluent API: `chat.conversations(
 #### `.send(content, metadata?)`
 Sends a message to the conversation.
 - `content`: The text content of the message.
-- `metadata`: Optional JSON object for custom data.
+- `metadata`: Optional JSON object for custom data (currently not processed by the server).
 - Returns: `Promise<void>`
 
+```typescript
+const ctx = chat.conversations(conversation.id);
+await ctx.send('Hello!');
+```
+
 #### `.messages().list(filters?)`
-Retrieves message history. Supports chaining for pagination.
+Retrieves message history with fluent API chaining.
 - `.limit(n)`: Limit number of messages.
-- `.page(n)`: specific page number.
-- `.offset(n)`: specific offset.
+- `.page(n)`: Specific page number.
+- `.offset(n)`: Specific offset.
 - Returns: `Promise<Message[]>`
 
-Example:
 ```typescript
 const history = await chat.conversations(id)
   .messages()
   .list()
   .limit(20)
-  .page(2);
+  .page(1);
 ```
 
 #### `.participants().list()`
 List all participants in the conversation.
 - Returns: `Promise<Participant[]>`
+
+```typescript
+const participants = await chat.conversations(id)
+  .participants()
+  .list();
+```
 
 #### `.participants().add(userId, role?)`
 Add a user to the conversation (Admin only).
@@ -123,9 +158,19 @@ Add a user to the conversation (Admin only).
 - `role`: 'admin' or 'member' (default: 'member').
 - Returns: `Promise<void>`
 
+```typescript
+await chat.conversations(id)
+  .participants()
+  .add('user_789', 'member');
+```
+
 #### `.leave()`
 Removes the current user from the conversation.
 - Returns: `Promise<void>`
+
+```typescript
+await chat.conversations(conversation.id).leave();
+```
 
 ### Global Events
 
