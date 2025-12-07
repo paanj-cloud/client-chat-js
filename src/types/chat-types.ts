@@ -30,9 +30,14 @@ export interface Conversation {
     participants?: string[]; // User IDs
 }
 
+export interface ConversationMember {
+    userId: string;
+    role?: 'admin' | 'member';
+}
+
 export interface CreateConversationData {
     name?: string;
-    participantIds: string[];
+    participants?: ConversationMember[]; // Participants with roles (defaults to 'member')
     metadata?: Record<string, any>;
 }
 

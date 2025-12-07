@@ -16,6 +16,7 @@ export type {
     User,
     Message,
     Conversation,
+    ConversationMember,
     CreateConversationData,
     ConversationFilters,
     MessageFilters,

@@ -22,14 +22,14 @@ export class ConversationsResource {
             metadata: data.metadata
         };
 
-        // Only add other participants - the API server will automatically
-        // add the creator as an admin member
-        if (data.participantIds) {
-            payload.members = data.participantIds.map(id => ({
-                userId: parseInt(id),
-                role: 'member'
+        // Add participants with roles (defaults to 'member' if role not specified)
+        if (data.participants && data.participants.length > 0) {
+            payload.members = data.participants.map(p => ({
+                userId: parseInt(p.userId),
+                role: p.role || 'member'
             }));
         }
+        // If no participants provided, API server will automatically add creator as admin
 
         const conversation = await httpClient.request<Conversation>('POST', '/api/v1/conversations', payload);
 

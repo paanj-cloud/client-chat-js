@@ -1,6 +1,6 @@
 {
     "name": "@paanj/chat-client",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "Chat client features for Paanj platform - real-time messaging and conversations",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",

@@ -61,7 +61,12 @@ export class ConversationContext {
      */
     async leave(): Promise<void> {
         const httpClient = this.client.getHttpClient();
-        await httpClient.request<void>('DELETE', `/api/v1/conversations/${this.conversationId}/participants/me`);
+        const userId = this.client.getUserId();
+        if (!userId) throw new Error('User not authenticated');
+
+        await httpClient.request<void>('DELETE', `/api/v1/conversations/${this.conversationId}/members`, {
+            userIds: [parseInt(userId)]
+        });
     }
 
     /**
