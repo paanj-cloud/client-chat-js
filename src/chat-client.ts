@@ -1,9 +1,9 @@
 import { PaanjClient } from '@paanj/client';
-import { MessagesResource } from './resources/messages';
-import { ConversationsResource } from './resources/conversations';
-import { UsersResource } from './resources/users';
-import { UserContext } from './resources/user-context';
-import { ConversationContext } from './resources/conversation-context';
+import { MessagesResource } from './resources/messages.js';
+import { ConversationsResource } from './resources/conversations.js';
+import { UsersResource } from './resources/users.js';
+import { UserContext } from './resources/user-context.js';
+import { ConversationContext } from './resources/conversation-context.js';
 
 /**
  * ChatClient - Chat features for Paanj platform

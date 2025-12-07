@@ -1,5 +1,5 @@
 import { PaanjClient, Unsubscribe } from '@paanj/client';
-import { UsersResource } from './users';
+import { UsersResource } from './users.js';
 
 export class UserContext {
     private client: PaanjClient;

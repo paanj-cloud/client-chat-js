@@ -9,7 +9,12 @@ if (typeof process !== 'undefined' && process.release?.name === 'node') {
     }
 }
 
-export { ChatClient } from './chat-client';
+export { ChatClient } from './chat-client.js';
+export { MessagesResource } from './resources/messages.js';
+export { ConversationsResource } from './resources/conversations.js';
+export { UsersResource } from './resources/users.js';
+export { UserContext } from './resources/user-context.js';
+export { ConversationContext } from './resources/conversation-context.js';
 
 // Export types
 export type {
@@ -20,4 +25,4 @@ export type {
     CreateConversationData,
     ConversationFilters,
     MessageFilters,
-} from './types/chat-types';
+} from './types/chat-types.js';

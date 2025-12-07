@@ -1,5 +1,5 @@
 import { PaanjClient, Unsubscribe } from '@paanj/client';
-import { Conversation, CreateConversationData, ConversationFilters } from '../types/chat-types';
+import { Conversation, CreateConversationData, ConversationFilters } from '../types/chat-types.js';
 
 /**
  * Conversations resource - manage and monitor conversations

@@ -1,5 +1,5 @@
 import { PaanjClient, Unsubscribe } from '@paanj/client';
-import { Message, MessageFilters } from '../types/chat-types';
+import { Message, MessageFilters } from '../types/chat-types.js';
 
 /**
  * Messages resource - manage and monitor messages
