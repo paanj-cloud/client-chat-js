@@ -16,7 +16,22 @@ export class ConversationsResource {
      */
     async create(data: CreateConversationData): Promise<Conversation> {
         const httpClient = this.client.getHttpClient();
-        const conversation = await httpClient.request<Conversation>('POST', '/api/v1/conversations', data);
+
+        const payload: any = {
+            name: data.name,
+            metadata: data.metadata
+        };
+
+        // Only add other participants - the API server will automatically
+        // add the creator as an admin member
+        if (data.participantIds) {
+            payload.members = data.participantIds.map(id => ({
+                userId: parseInt(id),
+                role: 'member'
+            }));
+        }
+
+        const conversation = await httpClient.request<Conversation>('POST', '/api/v1/conversations', payload);
 
         // Wait briefly for the server's conversation.created event to propagate
         // This ensures all participants (including creator) are subscribed via server-side event handling
@@ -44,7 +59,10 @@ export class ConversationsResource {
             if (finalFilters?.offset) params.append('offset', finalFilters.offset.toString());
 
             const query = params.toString();
-            return httpClient.request<Conversation[]>('GET', `/api/v1/conversations${query ? `?${query}` : ''}`);
+            const userId = this.client.getUserId();
+            if (!userId) throw new Error('User not authenticated');
+            const response = await httpClient.request<{ conversations: Conversation[] }>('GET', `/api/v1/users/${userId}/conversations${query ? `?${query}` : ''}`);
+            return response.conversations;
         };
 
         const currentFilters = { ...filters };

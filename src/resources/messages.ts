@@ -53,8 +53,11 @@ export class MessagesResource {
         const currentFilters = { ...filters };
 
         const chain = {
-            then: (resolve: (value: Message[]) => void, reject: (reason: any) => void) => {
+            then: (resolve: (value: Message[]) => void, reject?: (reason: any) => void) => {
                 return execute(currentFilters).then(resolve, reject);
+            },
+            catch: (reject: (reason: any) => void) => {
+                return execute(currentFilters).catch(reject);
             },
             limit: (limit: number) => {
                 currentFilters.limit = limit;

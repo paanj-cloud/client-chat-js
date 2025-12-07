@@ -41,6 +41,13 @@ export class ConversationContext {
     }
 
     /**
+     * Get conversation details
+     */
+    async get() {
+        return this.conversationsResource.get(this.conversationId);
+    }
+
+    /**
      * Access messages in this conversation
      */
     messages() {
